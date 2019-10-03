@@ -30,28 +30,27 @@ RUN DEBIAN_FRONTEND=noninteractive \
     --enable-pyvips8=no && \
   make && \
   make install && \
-  ldconfig && \
-  GO111MODULE=off go get -u github.com/golang/dep/cmd/dep
+  ldconfig
 
 # Installing golangci-lint
 WORKDIR /tmp
 RUN curl -fsSL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b "${GOPATH}/bin" v1.16.0
 
 
-WORKDIR ${GOPATH}/src/github.com/h2non/imaginary
+WORKDIR /usr/local/src/imaginary
 
 # Copy imaginary sources
 COPY . .
 
 # Making sure all dependencies are up-to-date
-RUN rm -rf vendor && dep ensure
+RUN rm -rf vendor && go mod vendor
 
 # Run quality control
-RUN GO111MODULE=off go test -test.v -test.race -test.covermode=atomic ./...
-RUN GO111MODULE=off golangci-lint run ./...
+RUN GO111MODULE=on go test -test.v -test.race -test.covermode=atomic ./...
+RUN GO111MODULE=on golangci-lint run ./...
 
 # Compile imaginary
-RUN GO111MODULE=off go build -a \
+RUN GO111MODULE=on go build -a \
     -o ${GOPATH}/bin/imaginary \
     -ldflags="-s -w -h -X main.Version=${IMAGINARY_VERSION}" \
     github.com/h2non/imaginary

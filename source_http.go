@@ -7,6 +7,8 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
+
+	"github.com/sethgrid/pester"
 )
 
 const ImageSourceTypeHTTP ImageSourceType = "http"
@@ -36,10 +38,16 @@ func (s *HTTPImageSource) GetImage(req *http.Request) ([]byte, error) {
 }
 
 func (s *HTTPImageSource) fetchImage(url *url.URL, ireq *http.Request) ([]byte, error) {
+	client := pester.New()
+	client.Concurrency = 3
+	client.MaxRetries = 5
+	client.Backoff = pester.ExponentialBackoff
+	client.KeepLog = true
+
 	// Check remote image size by fetching HTTP Headers
 	if s.Config.MaxAllowedSize > 0 {
 		req := newHTTPRequest(s, ireq, http.MethodHead, url)
-		res, err := http.DefaultClient.Do(req)
+		res, err := client.Do(req)
 		if err != nil {
 			return nil, fmt.Errorf("error fetching image http headers: %v", err)
 		}
@@ -56,7 +64,7 @@ func (s *HTTPImageSource) fetchImage(url *url.URL, ireq *http.Request) ([]byte, 
 
 	// Perform the request using the default client
 	req := newHTTPRequest(s, ireq, http.MethodGet, url)
-	res, err := http.DefaultClient.Do(req)
+	res, err := client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("error downloading image: %v", err)
 	}
