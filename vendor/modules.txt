@@ -1,7 +1,7 @@
 # github.com/hashicorp/golang-lru v0.0.0-20160813221303-0a025b7e63ad
 github.com/hashicorp/golang-lru
 github.com/hashicorp/golang-lru/simplelru
-# github.com/rs/cors v0.0.0-20170727213201-7af7a1e09ba3
+# github.com/rs/cors v1.5.0
 github.com/rs/cors
 # github.com/sethgrid/pester v0.0.0-20190127155807-68a33a018ad0
 github.com/sethgrid/pester
